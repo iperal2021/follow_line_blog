@@ -5,7 +5,7 @@ nav_exclude: false
 ---
 
 <center>
-  <img src="assets/img/elegoo_components_esp.jpg" width="350" height="150">
+  <img src="assets/img/elegoo_components_esp.jpg" width="250" height="350">
 </center>
 
 # Comunication
