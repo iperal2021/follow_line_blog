@@ -4,6 +4,9 @@ title: IoT comunication
 nav_exclude: false
 ---
 
+# Comunication
+The comunications of the robot consists of two parts: the serial communication between the arduino and the esp32 and the MQTT messages sent by the esp32 via wifi.
+
 1. The ping task has the highest pryority because of it must be send without the minimun delay. This task, like the following one, uses serial communication to send the value corresponding to the message that must be sent from the ESP32.
 
 ```cpp
