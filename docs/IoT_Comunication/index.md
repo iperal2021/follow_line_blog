@@ -31,3 +31,41 @@ if (Serial2.available()) {
 
   }
 ```
+
+### MQTT
+This is all made by the esp32. First it connects to a wifi network.
+```cpp
+void MQTT_connect() {
+  int8_t ret;
+
+  // Stop if already connected.
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.print("Connecting to MQTT... ");
+
+  uint8_t retries = 3;
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       Serial.println("Retrying MQTT connection in 5 seconds...");
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+       retries--;
+       if (retries == 0) {
+         // basically die and wait for WDT to reset me
+         while (1);
+       }
+  }
+  Serial.println("MQTT Connected!");
+  Serial2.print("5");
+  Serial.print("Messase sent! to Arduino");
+}
+```
+
+Then it connects to a topic of the MQTT server.
+```cpp
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT);
+
+Adafruit_MQTT_Publish topic_pub = Adafruit_MQTT_Publish(&mqtt, "/SETR/2023/15/");
+```
