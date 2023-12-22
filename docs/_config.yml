@@ -3,7 +3,7 @@ description: Documentatión and description of the fourth practice from Embeded 
 remote_theme: carlosperate/jekyll-theme-rtd
 
 # Theme settings:
-site_author: Pablo Sánchez Fernández
+site_author: Pablo Sánchez Fernández, Iker Peral del Pino
 repo_url: "https://github.com/iperal2021/follow_line_blog"
 edit_on_github: true
 github_docs_folder: true
