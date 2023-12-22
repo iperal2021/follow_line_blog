@@ -35,6 +35,23 @@ if (Serial2.available()) {
 ### MQTT
 This is all made by the esp32. First it connects to a wifi network.
 ```cpp
+void setup() {
+  // Connect to WiFi access point.
+  Serial.println(); Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(WLAN_SSID);
+
+  WiFi.begin(WLAN_SSID, WLAN_PASS);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+
+  Serial.println("WiFi connected");
+  Serial.println("IP address: "); Serial.println(WiFi.localIP());
+}
+
 void MQTT_connect() {
   int8_t ret;
 
