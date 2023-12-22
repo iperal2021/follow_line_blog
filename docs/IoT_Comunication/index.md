@@ -106,3 +106,24 @@ StaticJsonDocument<capacity> jsonDoc;
         Serial.println(F("OK!"));
       }
 ```
+
+When distances or times are required in the message, whe add another field using the switch of the serial connection.
+In order to send this numbers correctly we had to convert the data type of the buffer until they arrived to the topic correctly.
+```cpp
+          case 1:
+          jsonDoc["action"] = "END_LAP";
+          c = 'x';
+          sendBuff = "";
+          while(c != ';'){
+            
+            c = Serial2.read();
+            if (c == ';')  {
+              jsonDoc["time"] = sendBuff.toInt();
+            } else {
+              int intC = atoi(&c);
+              sendBuff += intC;
+              Serial.println(sendBuff);
+            }
+          }
+          break;
+```
