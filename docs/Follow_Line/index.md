@@ -4,13 +4,13 @@ title: Follow Line
 nav_exclude: false
 ---
 
-The follow line uses a 3 infrared sensor's array wich are used to determine the position of the black line.
+# Follow Line Robot
+
+The follow line uses a 3 infrared sensor array wich are used to determine the position of the black line.
+
+The robot should detect when its position changes and rectify to be on the most straight possible respectively to the line.
 
 To configure the different tasks executed we used the FreeRTOS library wich acts like a scheduler for Arduino.
-
-The two tasks:
-* Ping: sends a ping every four seconds.
-* Follow line: executes a finite state machine wich controls the movement.
 
 ### Finite State Machine
 
@@ -23,35 +23,35 @@ To control the line follower we use a finite state machine which determines the 
 
 ```cpp
 if (analogRead(PIN_ITR_MIDDLE) > 740 && analogRead(PIN_ITR_RIGHT) < 400 && analogRead(PIN_ITR_LEFT) < 400) {
-      STATE = 1;
-    } 
-    else if(analogRead(PIN_ITR_RIGHT) > 650) { 
-      error_r = analogRead(PIN_ITR_RIGHT);
-      error_l = analogRead(PIN_ITR_LEFT);
-      STATE = 2;            
-    }   
-    else if(analogRead(PIN_ITR_LEFT) > 650) {
-      error_r = analogRead(PIN_ITR_RIGHT);
-      error_l = analogRead(PIN_ITR_LEFT);
-      STATE = 3;
-    }
-    else if (analogRead(PIN_ITR_MIDDLE) < 400 && analogRead(PIN_ITR_RIGHT) < 400 && analogRead(PIN_ITR_LEFT) < 400) {
-      if (error_r > error_l) {
-        STATE = 5;
-      } else if (error_r < error_l) {
-        STATE = 4;
-      }
-    }
+  STATE = 1;
+} 
+else if(analogRead(PIN_ITR_RIGHT) > 650) { 
+  error_r = analogRead(PIN_ITR_RIGHT);
+  error_l = analogRead(PIN_ITR_LEFT);
+  STATE = 2;            
+}   
+else if(analogRead(PIN_ITR_LEFT) > 650) {
+  error_r = analogRead(PIN_ITR_RIGHT);
+  error_l = analogRead(PIN_ITR_LEFT);
+  STATE = 3;
+}
+else if (analogRead(PIN_ITR_MIDDLE) < 400 && analogRead(PIN_ITR_RIGHT) < 400 && analogRead(PIN_ITR_LEFT) < 400) {
+  if (error_r > error_l) {
+    STATE = 5;
+  } else if (error_r < error_l) {
+    STATE = 4;
+  }
+}
 
-    if (us_distance() < 10) {
-      if (!printed_dist)
-      {
-        Serial.print("2;");
-        Serial.print(String(us_distance()) +";");
-        printed_dist = true;
-      }
-      STATE = 6;
-    }
+if (us_distance() < 10) {
+  if (!printed_dist)
+  {
+    Serial.print("2;");
+    Serial.print(String(us_distance()) +";");
+    printed_dist = true;
+  }
+  STATE = 6;
+}
 ```
 
 To control all these states is used a *Switch-case* sentence. The cases have the same structure: a movement function is call and a message is send to de *ESP32* board depending wich *json* mesagge should be send. We use a *if* sentence in every case to to control that the message is only sent once. 
@@ -115,11 +115,22 @@ For each function the LED included in the car glows with a color to indicate the
 
 ### FreeRTOS
 
-FreeRTOS is a market-leading real-time operating system (RTOS) for microcontrollers and small microprocessors. Using this system we have created two different Task, one to control the movement an other to send periodically a ping message every four seconds.
-
-1. The ping task has the highest pryority because of it must be send without the minimun delay. This task, like the following one, uses serial communication to send the value corresponding to the message that must be sent from the ESP32.
+FreeRTOS is a market-leading real-time operating system (RTOS) for microcontrollers and small microprocessors. Using this system we have created two different Task, one to control the movement an other to send periodically a ping message every four seconds. Both tasks have the following structure:
 
 ```cpp
+#define PERIODIC_IDLE 50
+#define PING_IDLE 4000
+
+[...]
+
+void setup()
+{
+  [...]
+  xTaskCreate(followLineCallBack, "follow_line", 128, NULL, 2, &followLineHandle);
+  xTaskCreate(pingCallBack, "ping", 128, NULL, 1, &pingHandle );
+  [...]
+}
+
 static void pingCallBack( void *pvParameters)  // This is a Task.
 {
   TickType_t xLastWakeTime, aux;
@@ -130,15 +141,29 @@ static void pingCallBack( void *pvParameters)  // This is a Task.
     while ( (aux - xLastWakeTime)*portTICK_PERIOD_MS < COMPUTATION_TIME_ON_T1) {
       aux = xTaskGetTickCount();
     }
-[...]
-      if (!printed)
-      {
-        Serial.print("4;");
-        Serial.print(String(time_since_start) + ";");
-        printed = true;
-      }
-[...]
-    xTaskDelayUntil(&xLastWakeTime, (PING_IDLE/portTICK_PERIOD_MS));
+
+    [task code]
+
+  xTaskDelayUntil(&xLastWakeTime, (PING_IDLE/portTICK_PERIOD_MS));
+  }
+}
+
+static void followLineCallBack( void *pvParameters)  // This is a Task.
+{
+  TickType_t xLastWakeTime, aux;
+  while(1)
+  {
+    xLastWakeTime = xTaskGetTickCount();
+
+    while ( (aux - xLastWakeTime)*portTICK_PERIOD_MS < COMPUTATION_TIME_ON_T2) {
+      aux = xTaskGetTickCount();
+    }
+
+    [task code]
+
+    xTaskDelayUntil(&xLastWakeTime, (PERIODIC_IDLE/portTICK_PERIOD_MS));
   }
 }
 ```
+
+The *ping* task will be explained in the next section.
