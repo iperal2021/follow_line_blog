@@ -4,6 +4,10 @@ title: IoT comunication
 nav_exclude: false
 ---
 
+<center>
+  <img src="assets/img/elegoo_components_esp.jpg" width="350" height="150">
+</center>
+
 # Comunication
 The comunications of the robot consists of two parts: the serial communication between the arduino and the esp32 and the MQTT messages sent by the esp32 via wifi.
 
