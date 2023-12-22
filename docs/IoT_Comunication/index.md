@@ -86,3 +86,23 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT);
 
 Adafruit_MQTT_Publish topic_pub = Adafruit_MQTT_Publish(&mqtt, "/SETR/2023/15/");
 ```
+
+To be able to send messages to the topic it must send them in json format. To send the json first it is created, then its fields are filled by the information that needs to be send, the json is serialized and it is published in the topic.
+```cpp
+StaticJsonDocument<capacity> jsonDoc;
+[...]
+      jsonDoc["team_name"] = "EstresaDittos";
+      jsonDoc["id"] = "15";
+
+      [...]
+
+      char jsonString[capacity*2];
+      serializeJson(jsonDoc, jsonString);
+
+      Serial.print(F("\nSending json "));
+      if (! topic_pub.publish(jsonString)) {
+        Serial.println(F("Failed"));
+      } else {
+        Serial.println(F("OK!"));
+      }
+```
