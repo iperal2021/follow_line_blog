@@ -4,6 +4,10 @@ title: Follow Line
 nav_exclude: false
 ---
 
+<center>
+  <img src="assets/img/elegoo_components_ir.jpg" width="200" height="300">
+</center>
+
 # Follow Line Robot
 
 The follow line uses a 3 infrared sensor array wich are used to determine the position of the black line.
